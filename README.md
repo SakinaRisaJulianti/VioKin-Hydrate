@@ -32,27 +32,6 @@ viokin-hydrate/
 
 ---
 
-## 🚀 Cara Deploy (Gratis)
-
-### Opsi 1 — GitHub Pages
-```bash
-git init
-git add .
-git commit -m "first commit: VioKin Hydrate"
-git remote add origin https://github.com/USERNAME/viokin-hydrate.git
-git push -u origin main
-```
-Lalu aktifkan di: **Settings → Pages → Branch: main → Save**
-
-URL akan jadi: `https://USERNAME.github.io/viokin-hydrate`
-
-### Opsi 2 — Netlify (Drag & Drop)
-1. Buka netlify.com → daftar gratis
-2. Klik **"Add new site" → "Deploy manually"**
-3. Drag & drop seluruh folder
-4. Selesai! Dapat link langsung
-
----
 
 ## 📲 Cara Install di HP
 
