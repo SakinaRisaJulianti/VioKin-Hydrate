@@ -1,0 +1,53 @@
+{
+  "_info": "File ini memberitahu browser bahwa ini adalah PWA yang bisa diinstall",
+
+  "name"        : "VioKin Hydrate - Pengingat Minum Air",
+  "short_name"  : "VioKin Hydrate",
+  "description" : "Aplikasi pengingat minum air harian yang elegan dan mudah digunakan",
+
+  "_info_start_url": "Halaman pertama yang dibuka saat ikon di layar utama ditekan",
+  "start_url"   : "./index.html",
+  "scope"       : "./",
+
+  "_info_display": "standalone = tampil seperti aplikasi asli tanpa address bar browser",
+  "display"     : "standalone",
+
+  "_info_warna": "background_color = warna saat loading, theme_color = warna bar atas HP",
+  "background_color" : "#061e2e",
+  "theme_color"      : "#0a4d6e",
+
+  "_info_orientation": "portrait = aplikasi selalu tampil tegak",
+  "orientation" : "portrait",
+
+  "_info_icons": "Ikon yang muncul di layar utama HP setelah diinstall",
+  "icons": [
+    {
+      "src"    : "icon-192.png",
+      "sizes"  : "192x192",
+      "type"   : "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src"    : "icon-512.png",
+      "sizes"  : "512x512",
+      "type"   : "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+
+  "lang"        : "id",
+  "dir"         : "ltr",
+
+  "_info_categories": "Kategori aplikasi untuk toko / direktori aplikasi",
+  "categories"  : ["health", "lifestyle"],
+
+  "_info_shortcuts": "Menu pintasan saat ikon ditekan lama di HP Android",
+  "shortcuts": [
+    {
+      "name"       : "Tambah 250ml",
+      "short_name" : "Minum",
+      "description": "Catat minum 1 gelas air",
+      "url"        : "./index.html"
+    }
+  ]
+}

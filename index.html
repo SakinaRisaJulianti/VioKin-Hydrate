@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  APLIKASI  : VioKin Hydrate — Pengingat Minum Air
+  JENIS     : Progressive Web App (PWA)
+  VERSI     : 1.0
+  ============================================================
+  STRUKTUR PROJECT:
+    index.html    — Struktur halaman (HTML)
+    style.css     — Tampilan & animasi (CSS)
+    app.js        — Logika aplikasi (JavaScript)
+    manifest.json — Konfigurasi PWA (installasi di HP/PC)
+    sw.js         — Service Worker (agar bisa offline)
+  ============================================================
+-->
+<html lang="id">
+
+<!-- ======================================================
+     BAGIAN HEAD
+     Berisi: pengaturan meta, link ke CSS & manifest
+     ====================================================== -->
+<head>
+  <meta charset="UTF-8">
+  <!-- Agar tampilan menyesuaikan layar HP -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <!-- Warna tema browser (bar atas di HP) -->
+  <meta name="theme-color" content="#0a4d6e">
+  <!-- Agar bisa diinstall seperti aplikasi di iPhone -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VioKin Hydrate">
+  <!-- Deskripsi aplikasi -->
+  <meta name="description" content="Aplikasi pengingat minum air harian yang elegan">
+
+  <!-- Menghubungkan ke manifest.json untuk fitur PWA (installasi di HP/PC) -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Google Fonts: Playfair Display (judul) + DM Sans (teks biasa) -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Menghubungkan ke file CSS eksternal -->
+  <link rel="stylesheet" href="style.css">
+
+  <title>VioKin Hydrate</title>
+</head>
+
+<!-- ======================================================
+     BAGIAN BODY
+     Hanya berisi struktur HTML.
+     Tampilan ada di  → style.css
+     Logika ada di    → app.js
+     ====================================================== -->
+<body>
+
+  <!-- LATAR BELAKANG ANIMASI (dekoratif, dibuat JS) -->
+  <div class="latar-scene">
+    <div class="latar-gradien"></div>
+    <div class="ombak-latar"></div>
+    <div class="ombak-latar"></div>
+  </div>
+
+  <!-- TOAST: Pesan singkat yang muncul di atas layar -->
+  <div class="toast" id="toast"></div>
+
+  <!-- EFEK PERCIKAN: Ikon air melayang saat minum -->
+  <div class="efek-percikan" id="percikan"></div>
+
+  <!-- WADAH UTAMA APLIKASI -->
+  <div class="aplikasi">
+
+    <!-- ── HEADER: Logo & Tanggal ── -->
+    <div class="header">
+      <div>
+        <div class="logo-nama">VioKin Hydrate</div>
+        <div class="logo-sub">Minum Air • Hidup Sehat</div>
+      </div>
+      <div class="header-tanggal" id="headerTanggal">
+        <!-- Diisi otomatis oleh JavaScript -->
+      </div>
+    </div>
+
+    <!-- ==========================================
+         HALAMAN 1: BERANDA
+         ========================================== -->
+    <div class="halaman aktif" id="halaman-beranda">
+
+      <!-- Banner selamat (hanya muncul saat target 100%) -->
+      <div id="bannerSelamat" style="display:none" class="banner-selamat">
+        <span class="ikon-trofi">
+          <!-- SVG Trofi -->
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f0a500" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
+            <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+            <path d="M4 22h16"/>
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+            <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+          </svg>
+        </span>
+        <div>
+          <strong>Target Tercapai!</strong>
+          <span>Luar biasa! Kamu sudah minum cukup hari ini</span>
+        </div>
+      </div>
+
+      <!-- KARTU UTAMA: Lingkaran Progress Air -->
+      <div class="kartu-air">
+
+        <!-- Lingkaran progress (klik untuk tambah 250ml) -->
+        <div class="bungkus-lingkaran">
+          <div class="lingkaran-utama" onclick="tambahAir(250)" title="Klik untuk tambah 250ml">
+
+            <!-- Efek isi air dalam lingkaran -->
+            <div class="isi-air">
+              <div class="ombak-isi" id="ombakIsi"></div>
+            </div>
+
+            <!-- SVG Lingkaran Progress -->
+            <svg class="svg-lingkaran" viewBox="0 0 180 180">
+              <defs>
+                <linearGradient id="gradienProgress" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"   style="stop-color:#5bb8d4"/>
+                  <stop offset="100%" style="stop-color:#1a7fa0"/>
+                </linearGradient>
+              </defs>
+              <circle class="lingkaran-latar"    cx="90" cy="90" r="80"/>
+              <circle class="lingkaran-progress" cx="90" cy="90" r="80" id="progressLingkaran"/>
+            </svg>
+
+            <!-- Teks di tengah lingkaran -->
+            <div class="teks-lingkaran">
+              <span class="jumlah-ml" id="jumlahSaatIni">0</span>
+              <span class="satuan-ml">ml</span>
+              <span class="teks-tap">+ 250ml</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 3 Kotak Statistik -->
+        <div class="baris-statistik">
+          <div class="item-statistik">
+            <div class="nilai-statistik" id="statPersen">0%</div>
+            <div class="label-statistik">Tercapai</div>
+          </div>
+          <div class="item-statistik">
+            <div class="nilai-statistik" id="statSisa">2000</div>
+            <div class="label-statistik">Sisa (ml)</div>
+          </div>
+          <div class="item-statistik">
+            <div class="nilai-statistik" id="statGelas">0</div>
+            <div class="label-statistik">Gelas</div>
+          </div>
+        </div>
+
+        <!-- Tombol Tambah Cepat -->
+        <div class="label-cepat">Tambah Cepat</div>
+        <div class="grid-cepat">
+
+          <!-- 150ml — Gelas kecil -->
+          <button class="tombol-cepat" onclick="tambahAir(150)">
+            <span class="ikon-cepat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3h8l-1.5 18h-5L8 3z"/><path d="M9 13h6" opacity="0.5"/>
+              </svg>
+            </span>
+            150ml
+          </button>
+
+          <!-- 250ml — Gelas sedang -->
+          <button class="tombol-cepat" onclick="tambahAir(250)">
+            <span class="ikon-cepat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 3h10l-2 18H9L7 3z"/><path d="M8.5 12h7" opacity="0.5"/>
+              </svg>
+            </span>
+            250ml
+          </button>
+
+          <!-- 330ml — Botol kecil -->
+          <button class="tombol-cepat" onclick="tambahAir(330)">
+            <span class="ikon-cepat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 2h4v3l2 3v13a1 1 0 01-1 1H9a1 1 0 01-1-1V8l2-3V2z"/><path d="M9 14h6" opacity="0.5"/>
+              </svg>
+            </span>
+            330ml
+          </button>
+
+          <!-- 500ml — Botol besar -->
+          <button class="tombol-cepat" onclick="tambahAir(500)">
+            <span class="ikon-cepat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 2h6v3l3 4v12a1 1 0 01-1 1H7a1 1 0 01-1-1V9l3-4V2z"/><path d="M8 15h8" opacity="0.5"/>
+              </svg>
+            </span>
+            500ml
+          </button>
+
+        </div>
+      </div><!-- /.kartu-air -->
+
+      <!-- Log minum hari ini -->
+      <div class="judul-seksi">Catatan Hari Ini</div>
+      <div class="kartu-riwayat">
+        <div id="logHariIni">
+          <div class="riwayat-kosong">
+            <span class="ikon-kosong">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path d="M12 2C9 7 5 11.5 5 15a7 7 0 0014 0c0-3.5-3-8-7-13z"/>
+                <path d="M9 15.5a3 3 0 004 0" opacity="0.5"/>
+              </svg>
+            </span>
+            Belum ada catatan.<br>Ayo mulai minum air!
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /#halaman-beranda -->
+
+
+    <!-- ==========================================
+         HALAMAN 2: PENGINGAT
+         ========================================== -->
+    <div class="halaman" id="halaman-pengingat">
+
+      <div style="padding: 8px 0 16px">
+        <!-- Judul dengan SVG Jam -->
+        <div class="judul-seksi judul-ikon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Pengingat Otomatis
+        </div>
+      </div>
+
+      <!-- Kartu: Toggle Notifikasi -->
+      <div class="kartu-pengaturan">
+        <div class="baris-pengaturan">
+          <div class="info-pengaturan">
+            <!-- SVG Lonceng -->
+            <div class="ikon-pengaturan">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 01-3.46 0"/>
+              </svg>
+            </div>
+            <div class="teks-pengaturan">
+              <strong>Notifikasi</strong>
+              <span id="statusPengingat">Klik untuk mengaktifkan</span>
+            </div>
+          </div>
+          <!-- Toggle ON/OFF -->
+          <div class="toggle" id="togglePengingat" onclick="togglePengingat()">
+            <div class="toggle-bulat"></div>
+          </div>
+        </div>
+
+        <!-- Pilihan interval pengingat -->
+        <div class="label-cepat" style="margin-bottom: 12px">Interval Pengingat</div>
+        <div class="baris-interval">
+          <button class="tombol-interval"         data-val="30"  onclick="setInterval_(30)">30 menit</button>
+          <button class="tombol-interval dipilih" data-val="60"  onclick="setInterval_(60)">1 jam</button>
+          <button class="tombol-interval"         data-val="90"  onclick="setInterval_(90)">1.5 jam</button>
+          <button class="tombol-interval"         data-val="120" onclick="setInterval_(120)">2 jam</button>
+        </div>
+      </div>
+
+      <!-- Kartu: Target Harian -->
+      <div class="judul-seksi judul-ikon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+        </svg>
+        Target Harian
+      </div>
+      <div class="kartu-pengaturan">
+        <div class="baris-target">
+          <div>
+            <div style="font-size:13px; color:var(--warna-teks-dim); margin-bottom:4px">Target minum per hari</div>
+            <div class="nilai-target" id="tampilTarget">2000 ml</div>
+          </div>
+          <div style="font-size:11px; color:var(--warna-teks-dim); text-align:right">
+            ≈ <span id="gelasTarget">8</span> gelas<br>standar
+          </div>
+        </div>
+        <!-- Slider 1000–4000 ml -->
+        <input type="range" class="slider-target" id="sliderTarget"
+          min="1000" max="4000" step="250" value="2000"
+          oninput="ubahTarget(this.value)">
+        <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:var(--warna-teks-dim)">
+          <span>1000 ml</span><span>4000 ml</span>
+        </div>
+      </div>
+
+      <!-- Tips Hidrasi -->
+      <div class="judul-seksi judul-ikon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <circle cx="12" cy="8.5" r="0.5" fill="currentColor"/>
+        </svg>
+        Tips Hidrasi
+      </div>
+      <div class="kartu-pengaturan">
+        <div class="daftar-tips">
+          <div class="item-tips">
+            <svg class="ikon-tips" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C9 7 5 11 5 15a7 7 0 0014 0c0-4-3-8-7-13z"/></svg>
+            <span>Minum 1 gelas setelah bangun tidur</span>
+          </div>
+          <div class="item-tips">
+            <svg class="ikon-tips" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            <span>Kurangi minuman berkafein</span>
+          </div>
+          <div class="item-tips">
+            <svg class="ikon-tips" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Tambah 500ml setelah olahraga</span>
+          </div>
+          <div class="item-tips">
+            <svg class="ikon-tips" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            <span>Berhenti minum 1 jam sebelum tidur</span>
+          </div>
+          <div class="item-tips">
+            <svg class="ikon-tips" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+            <span>Di hari panas, tambah 250–500ml</span>
+          </div>
+          <div class="item-tips">
+            <svg class="ikon-tips" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span>Aktifkan notifikasi agar tidak lupa</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /#halaman-pengingat -->
+
+
+    <!-- ==========================================
+         HALAMAN 3: RIWAYAT
+         ========================================== -->
+    <div class="halaman" id="halaman-riwayat">
+
+      <div style="padding: 8px 0 16px">
+        <div class="judul-seksi judul-ikon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8"  y1="2" x2="8"  y2="6"/>
+            <line x1="3"  y1="10" x2="21" y2="10"/>
+          </svg>
+          Riwayat 7 Hari
+        </div>
+      </div>
+      <!-- Diisi oleh JavaScript saat tab dibuka -->
+      <div id="daftarRiwayat" style="padding: 0 16px"></div>
+
+    </div><!-- /#halaman-riwayat -->
+
+  </div><!-- /.aplikasi -->
+
+
+  <!-- ── NAVIGASI BAWAH: 3 Tab ── -->
+  <div class="nav-bawah">
+
+    <button class="tombol-nav aktif" id="nav-beranda" onclick="tampilHalaman('beranda')">
+      <span class="ikon-nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M12 2C9 7 5 11.5 5 15a7 7 0 0014 0c0-3.5-3-8-7-13z"/>
+          <path d="M9 15.5a3 3 0 004 0" opacity="0.6"/>
+        </svg>
+      </span>
+      <span>Beranda</span>
+    </button>
+
+    <button class="tombol-nav" id="nav-pengingat" onclick="tampilHalaman('pengingat')">
+      <span class="ikon-nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </span>
+      <span>Pengingat</span>
+    </button>
+
+    <button class="tombol-nav" id="nav-riwayat" onclick="tampilHalaman('riwayat')">
+      <span class="ikon-nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2"/>
+          <line x1="9" y1="8"  x2="15" y2="8"/>
+          <line x1="9" y1="12" x2="15" y2="12"/>
+          <line x1="9" y1="16" x2="12" y2="16"/>
+        </svg>
+      </span>
+      <span>Riwayat</span>
+    </button>
+
+  </div>
+
+  <!--
+    File JavaScript diletakkan di BAWAH body
+    agar semua elemen HTML sudah siap sebelum JS berjalan.
+  -->
+  <script src="app.js"></script>
+
+</body>
+</html>

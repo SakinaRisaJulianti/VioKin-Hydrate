@@ -1,0 +1,818 @@
+/*
+  ============================================================
+  FILE     : style.css
+  APLIKASI : VioKin Hydrate — Pengingat Minum Air
+  BERISI   : Semua pengaturan tampilan (warna, layout, animasi)
+  ============================================================
+  DAFTAR ISI:
+    1.  Variabel Warna
+    2.  Reset & Dasar
+    3.  Latar Belakang Animasi
+    4.  Tata Letak Utama
+    5.  Header
+    6.  Kartu Utama (Progress Air)
+    7.  Lingkaran Progress
+    8.  Statistik
+    9.  Tombol Tambah Cepat
+   10.  Ikon SVG
+   11.  Judul Seksi
+   12.  Kartu Pengaturan & Pengingat
+   13.  Toggle ON/OFF
+   14.  Interval & Slider
+   15.  Tips Hidrasi
+   16.  Riwayat / Log
+   17.  Navigasi Bawah
+   18.  Toast Notifikasi
+   19.  Banner Selamat
+   20.  Efek Percikan
+   21.  Sistem Halaman (Tab)
+  ============================================================
+*/
+
+
+/* ============================================================
+   1. VARIABEL WARNA
+   Mengubah 1 variabel = berubah di seluruh aplikasi.
+   ============================================================ */
+:root {
+  --warna-gelap    : #061e2e;   /* Latar belakang utama */
+  --warna-lautan   : #0a4d6e;   /* Biru lautan */
+  --warna-ombak    : #1a7fa0;   /* Biru ombak */
+  --warna-busa     : #5bb8d4;   /* Biru muda */
+  --warna-kabut    : #a8dce9;   /* Biru kabut */
+  --warna-putih    : #f5fbfe;   /* Hampir putih */
+  --warna-aksen    : #f0a500;   /* Kuning (pencapaian) */
+  --warna-hapus    : #e05555;   /* Merah (hapus) */
+  --warna-teks     : #e8f6fc;   /* Teks utama */
+  --warna-teks-dim : #7ab8cc;   /* Teks sekunder */
+}
+
+
+/* ============================================================
+   2. RESET & DASAR
+   ============================================================ */
+* {
+  margin     : 0;
+  padding    : 0;
+  box-sizing : border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family : 'DM Sans', sans-serif;
+  background  : var(--warna-gelap);
+  color       : var(--warna-teks);
+  min-height  : 100vh;
+  overflow-x  : hidden;
+}
+
+
+/* ============================================================
+   3. LATAR BELAKANG ANIMASI
+   Gradien, gelembung naik, dan ombak bawah — semua dekoratif.
+   ============================================================ */
+.latar-scene {
+  position       : fixed;
+  inset          : 0;       /* = top:0; right:0; bottom:0; left:0 */
+  z-index        : 0;
+  overflow       : hidden;
+  pointer-events : none;    /* Tidak bisa diklik */
+}
+
+/* Gradien radial sebagai latar utama */
+.latar-gradien {
+  position   : absolute;
+  inset      : 0;
+  background : radial-gradient(ellipse at 20% 20%, #0d3d5e 0%, #061e2e 50%, #030e17 100%);
+}
+
+/* Gelembung air yang naik ke atas (dibuat via JavaScript) */
+.gelembung {
+  position      : absolute;
+  border-radius : 50%;
+  background    : radial-gradient(circle at 30% 30%, rgba(91,184,212,0.22), rgba(26,127,160,0.04));
+  border        : 1px solid rgba(91,184,212,0.1);
+  animation     : naik-gelembung linear infinite;
+}
+
+@keyframes naik-gelembung {
+  0%   { transform: translateY(110vh) scale(0.8); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 0.4; }
+  100% { transform: translateY(-20vh) scale(1.1); opacity: 0; }
+}
+
+/* Ombak di bagian bawah layar */
+.ombak-latar {
+  position      : absolute;
+  bottom        : 0;
+  left          : -50%;
+  width         : 200%;
+  height        : 180px;
+  background    : linear-gradient(180deg, transparent, rgba(26,127,160,0.09));
+  border-radius : 50% 50% 0 0;
+  animation     : gerak-ombak 8s ease-in-out infinite;
+}
+
+.ombak-latar:nth-child(3) {
+  bottom    : 10px;
+  animation : gerak-ombak 10s ease-in-out infinite reverse;
+  opacity   : 0.6;
+}
+
+@keyframes gerak-ombak {
+  0%, 100% { transform: translateX(0) scaleY(1); }
+  50%       { transform: translateX(-5%) scaleY(1.1); }
+}
+
+
+/* ============================================================
+   4. TATA LETAK UTAMA
+   Membatasi lebar maksimum dan memusatkan di layar.
+   ============================================================ */
+.aplikasi {
+  position    : relative;
+  z-index     : 1;
+  max-width   : 420px;   /* Lebar seperti layar HP */
+  margin      : 0 auto;
+  min-height  : 100vh;
+  padding-bottom: 100px; /* Ruang untuk navigasi bawah */
+}
+
+
+/* ============================================================
+   5. HEADER (BAGIAN ATAS)
+   ============================================================ */
+.header {
+  padding         : 52px 24px 24px;
+  display         : flex;
+  justify-content : space-between;
+  align-items     : flex-start;
+}
+
+.logo-nama {
+  font-family : 'Playfair Display', serif;
+  font-size   : 26px;
+  font-weight : 700;
+  /* Teks bergradien */
+  background              : linear-gradient(135deg, var(--warna-putih), var(--warna-busa));
+  -webkit-background-clip : text;
+  -webkit-text-fill-color : transparent;
+  background-clip         : text;
+}
+
+.logo-sub {
+  font-size      : 11px;
+  color          : var(--warna-teks-dim);
+  letter-spacing : 2px;
+  text-transform : uppercase;
+  margin-top     : 3px;
+}
+
+.header-tanggal {
+  text-align  : right;
+  font-size   : 12px;
+  color       : var(--warna-teks-dim);
+  line-height : 1.6;
+}
+
+.header-tanggal strong {
+  display   : block;
+  color     : var(--warna-teks);
+  font-size : 14px;
+}
+
+
+/* ============================================================
+   6. KARTU UTAMA (PROGRESS AIR)
+   ============================================================ */
+.kartu-air {
+  margin          : 0 16px 20px;
+  background      : linear-gradient(145deg, rgba(26,127,160,0.22), rgba(10,77,110,0.38));
+  border          : 1px solid rgba(91,184,212,0.18);
+  border-radius   : 28px;
+  padding         : 28px 24px;
+  backdrop-filter : blur(20px);
+  position        : relative;
+  overflow        : hidden;
+}
+
+/* Garis cahaya tipis di bagian atas kartu */
+.kartu-air::before {
+  content    : '';
+  position   : absolute;
+  top: 0; left: 0; right: 0;
+  height     : 1px;
+  background : linear-gradient(90deg, transparent, rgba(91,184,212,0.5), transparent);
+}
+
+
+/* ============================================================
+   7. LINGKARAN PROGRESS
+   ============================================================ */
+.bungkus-lingkaran {
+  display         : flex;
+  justify-content : center;
+  margin-bottom   : 28px;
+}
+
+.lingkaran-utama {
+  position   : relative;
+  width      : 180px;
+  height     : 180px;
+  cursor     : pointer;
+  transition : transform 0.2s;
+}
+
+.lingkaran-utama:active { transform: scale(0.96); }
+
+/* SVG lingkaran — diputar -90° agar dimulai dari atas */
+.svg-lingkaran {
+  width     : 180px;
+  height    : 180px;
+  transform : rotate(-90deg);
+}
+
+/* Lingkaran latar (abu-abu redup) */
+.lingkaran-latar {
+  fill         : none;
+  stroke       : rgba(91,184,212,0.1);
+  stroke-width : 10;
+}
+
+/* Lingkaran progress — berubah sesuai persentase minum */
+.lingkaran-progress {
+  fill             : none;
+  stroke           : url(#gradienProgress);
+  stroke-width     : 10;
+  stroke-linecap   : round;
+  /* Keliling: 2 × π × 80 ≈ 502  */
+  stroke-dasharray : 502;
+  /* Awalnya penuh tersembunyi */
+  stroke-dashoffset: 502;
+  transition       : stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1);
+  filter           : drop-shadow(0 0 8px rgba(91,184,212,0.45));
+}
+
+/* Isi air dalam lingkaran (naik sesuai %) */
+.isi-air {
+  position      : absolute;
+  border-radius : 50%;
+  overflow      : hidden;
+  width         : 140px;
+  height        : 140px;
+  top: 20px; left: 20px;
+}
+
+.ombak-isi {
+  position   : absolute;
+  bottom     : 0;
+  left       : -50%;
+  width      : 200%;
+  background : linear-gradient(180deg, rgba(91,184,212,0.1), rgba(26,127,160,0.22));
+  /* Animasi naik saat air bertambah */
+  transition : height 1s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Teks di tengah lingkaran */
+.teks-lingkaran {
+  position        : absolute;
+  inset           : 0;
+  display         : flex;
+  flex-direction  : column;
+  align-items     : center;
+  justify-content : center;
+}
+
+.jumlah-ml  {
+  font-family : 'Playfair Display', serif;
+  font-size   : 38px;
+  font-weight : 700;
+  color       : var(--warna-putih);
+  line-height : 1;
+  transition  : all 0.4s;
+}
+
+.satuan-ml  { font-size: 13px; color: var(--warna-busa); letter-spacing: 1px; }
+.teks-tap   { font-size: 11px; color: var(--warna-teks-dim); margin-top: 6px; }
+
+
+/* ============================================================
+   8. STATISTIK (3 KOTAK KECIL)
+   ============================================================ */
+.baris-statistik {
+  display               : grid;
+  grid-template-columns : 1fr 1fr 1fr;
+  gap                   : 12px;
+  margin-bottom         : 24px;
+}
+
+.item-statistik {
+  background    : rgba(10,77,110,0.35);
+  border        : 1px solid rgba(91,184,212,0.1);
+  border-radius : 16px;
+  padding       : 12px 8px;
+  text-align    : center;
+}
+
+.nilai-statistik {
+  font-family : 'Playfair Display', serif;
+  font-size   : 20px;
+  color       : var(--warna-putih);
+  font-weight : 700;
+}
+
+.label-statistik {
+  font-size      : 10px;
+  color          : var(--warna-teks-dim);
+  text-transform : uppercase;
+  letter-spacing : 1px;
+  margin-top     : 2px;
+}
+
+
+/* ============================================================
+   9. TOMBOL TAMBAH CEPAT
+   ============================================================ */
+.label-cepat {
+  font-size      : 11px;
+  color          : var(--warna-teks-dim);
+  text-transform : uppercase;
+  letter-spacing : 1.5px;
+  margin-bottom  : 12px;
+}
+
+.grid-cepat {
+  display               : grid;
+  grid-template-columns : repeat(4, 1fr);
+  gap                   : 8px;
+}
+
+.tombol-cepat {
+  background    : rgba(10,77,110,0.45);
+  border        : 1px solid rgba(91,184,212,0.18);
+  border-radius : 14px;
+  padding       : 12px 6px;
+  color         : var(--warna-busa);
+  font-family   : 'DM Sans', sans-serif;
+  font-size     : 13px;
+  font-weight   : 500;
+  cursor        : pointer;
+  transition    : all 0.2s;
+  display       : flex;
+  flex-direction: column;
+  align-items   : center;
+  gap           : 6px;
+}
+
+.tombol-cepat:hover,
+.tombol-cepat:active {
+  background : rgba(91,184,212,0.18);
+  border-color: rgba(91,184,212,0.45);
+  transform  : translateY(-2px);
+}
+
+
+/* ============================================================
+   10. IKON SVG
+   ============================================================ */
+
+/* Ikon di tombol tambah cepat */
+.ikon-cepat {
+  width           : 22px;
+  height          : 22px;
+  display         : flex;
+  align-items     : center;
+  justify-content : center;
+}
+
+.ikon-cepat svg {
+  width  : 100%;
+  height : 100%;
+}
+
+/* Ikon di navigasi bawah */
+.ikon-nav {
+  width           : 24px;
+  height          : 24px;
+  display         : flex;
+  align-items     : center;
+  justify-content : center;
+}
+
+.ikon-nav svg {
+  width  : 100%;
+  height : 100%;
+}
+
+/* Ikon trofi di banner selamat */
+.ikon-trofi {
+  width      : 28px;
+  height     : 28px;
+  flex-shrink: 0;
+}
+
+/* Ikon tetes air di empty state */
+.ikon-kosong {
+  width           : 44px;
+  height          : 44px;
+  display         : flex;
+  align-items     : center;
+  justify-content : center;
+  margin          : 0 auto 12px;
+  opacity         : 0.45;
+  color           : var(--warna-busa);
+}
+
+.ikon-kosong svg {
+  width  : 100%;
+  height : 100%;
+}
+
+/* Ikon di kartu pengaturan (lonceng) */
+.ikon-pengaturan {
+  width           : 44px;
+  height          : 44px;
+  background      : rgba(91,184,212,0.12);
+  border-radius   : 12px;
+  display         : flex;
+  align-items     : center;
+  justify-content : center;
+  color           : var(--warna-busa);
+  flex-shrink     : 0;
+}
+
+
+/* ============================================================
+   11. JUDUL SEKSI
+   ============================================================ */
+.judul-seksi {
+  font-family   : 'Playfair Display', serif;
+  font-size     : 18px;
+  color         : var(--warna-putih);
+  padding       : 0 16px;
+  margin-bottom : 12px;
+}
+
+/* Judul dengan ikon di sampingnya */
+.judul-ikon {
+  display     : flex;
+  align-items : center;
+  gap         : 8px;
+  color       : var(--warna-teks-dim);
+}
+
+.judul-ikon svg {
+  flex-shrink : 0;
+  color       : var(--warna-busa);
+}
+
+
+/* ============================================================
+   12. KARTU PENGATURAN
+   ============================================================ */
+.kartu-pengaturan {
+  margin        : 0 16px 20px;
+  background    : linear-gradient(145deg, rgba(26,127,160,0.13), rgba(10,77,110,0.28));
+  border        : 1px solid rgba(91,184,212,0.13);
+  border-radius : 20px;
+  padding       : 20px;
+}
+
+.baris-pengaturan {
+  display         : flex;
+  justify-content : space-between;
+  align-items     : center;
+  margin-bottom   : 16px;
+}
+
+.info-pengaturan     { display: flex; align-items: center; gap: 12px; }
+
+.teks-pengaturan strong { display: block; font-size: 15px; color: var(--warna-putih); }
+.teks-pengaturan span   { font-size: 12px; color: var(--warna-teks-dim); }
+
+
+/* ============================================================
+   13. TOGGLE ON/OFF
+   ============================================================ */
+.toggle {
+  width         : 52px;
+  height        : 28px;
+  background    : rgba(91,184,212,0.12);
+  border-radius : 14px;
+  position      : relative;
+  cursor        : pointer;
+  border        : 1px solid rgba(91,184,212,0.18);
+  transition    : all 0.3s;
+  flex-shrink   : 0;
+}
+
+/* Saat toggle aktif */
+.toggle.aktif {
+  background   : linear-gradient(90deg, var(--warna-ombak), var(--warna-busa));
+  border-color : var(--warna-busa);
+}
+
+/* Bulatan putih */
+.toggle-bulat {
+  position   : absolute;
+  top: 3px; left: 3px;
+  width      : 20px;
+  height     : 20px;
+  background : white;
+  border-radius: 50%;
+  transition : transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow : 0 2px 6px rgba(0,0,0,0.25);
+}
+
+/* Geser ke kanan saat aktif */
+.toggle.aktif .toggle-bulat { transform: translateX(24px); }
+
+
+/* ============================================================
+   14. TOMBOL INTERVAL & SLIDER TARGET
+   ============================================================ */
+.baris-interval {
+  display   : flex;
+  gap       : 8px;
+  flex-wrap : wrap;
+}
+
+.tombol-interval {
+  background    : rgba(10,77,110,0.45);
+  border        : 1px solid rgba(91,184,212,0.13);
+  border-radius : 10px;
+  padding       : 8px 14px;
+  color         : var(--warna-teks-dim);
+  font-size     : 13px;
+  font-family   : 'DM Sans', sans-serif;
+  cursor        : pointer;
+  transition    : all 0.2s;
+}
+
+.tombol-interval.dipilih {
+  background   : rgba(91,184,212,0.18);
+  border-color : var(--warna-busa);
+  color        : var(--warna-busa);
+}
+
+.baris-target {
+  display         : flex;
+  justify-content : space-between;
+  align-items     : center;
+  margin-bottom   : 16px;
+}
+
+.nilai-target {
+  font-family : 'Playfair Display', serif;
+  font-size   : 22px;
+  color       : var(--warna-putih);
+}
+
+/* Slider HTML */
+.slider-target {
+  -webkit-appearance : none;
+  width              : 100%;
+  height             : 4px;
+  background         : rgba(91,184,212,0.13);
+  border-radius      : 2px;
+  outline            : none;
+}
+
+.slider-target::-webkit-slider-thumb {
+  -webkit-appearance : none;
+  width              : 20px;
+  height             : 20px;
+  background         : linear-gradient(135deg, var(--warna-busa), var(--warna-ombak));
+  border-radius      : 50%;
+  cursor             : pointer;
+  box-shadow         : 0 0 10px rgba(91,184,212,0.45);
+}
+
+
+/* ============================================================
+   15. TIPS HIDRASI
+   ============================================================ */
+.daftar-tips {
+  display        : flex;
+  flex-direction : column;
+  gap            : 12px;
+}
+
+.item-tips {
+  display     : flex;
+  align-items : center;
+  gap         : 10px;
+  font-size   : 13px;
+  color       : var(--warna-teks-dim);
+}
+
+.ikon-tips {
+  width      : 15px;
+  height     : 15px;
+  flex-shrink: 0;
+  color      : var(--warna-busa);
+}
+
+
+/* ============================================================
+   16. RIWAYAT / LOG MINUM
+   ============================================================ */
+.kartu-riwayat {
+  margin        : 0 16px 20px;
+  background    : linear-gradient(145deg, rgba(26,127,160,0.13), rgba(10,77,110,0.28));
+  border        : 1px solid rgba(91,184,212,0.13);
+  border-radius : 20px;
+  overflow      : hidden;
+}
+
+/* Satu baris entri log */
+.item-riwayat {
+  display       : flex;
+  align-items   : center;
+  padding       : 14px 20px;
+  gap           : 12px;
+  border-bottom : 1px solid rgba(91,184,212,0.07);
+  animation     : masuk 0.3s ease;
+}
+
+@keyframes masuk {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.item-riwayat:last-child { border-bottom: none; }
+
+/* Titik biru kecil di kiri setiap entri */
+.titik-riwayat {
+  width         : 8px;
+  height        : 8px;
+  border-radius : 50%;
+  background    : var(--warna-busa);
+  flex-shrink   : 0;
+  box-shadow    : 0 0 6px rgba(91,184,212,0.5);
+}
+
+.waktu-riwayat  { font-size: 12px; color: var(--warna-teks-dim); width: 44px; flex-shrink: 0; }
+.jumlah-riwayat { font-size: 14px; color: var(--warna-putih); font-weight: 500; flex: 1; }
+
+/* Bar mini proporsi minum */
+.bar-riwayat-bungkus { flex: 1; }
+.bar-riwayat {
+  height        : 4px;
+  background    : rgba(91,184,212,0.08);
+  border-radius : 2px;
+  overflow      : hidden;
+}
+.bar-riwayat-isi {
+  height     : 100%;
+  background : linear-gradient(90deg, var(--warna-ombak), var(--warna-busa));
+  border-radius: 2px;
+  transition : width 0.8s ease;
+}
+
+/* Tombol hapus entri */
+.tombol-hapus {
+  background : none;
+  border     : none;
+  color      : rgba(224,85,85,0.4);
+  font-size  : 14px;
+  cursor     : pointer;
+  padding    : 4px;
+  transition : color 0.2s;
+  line-height: 1;
+}
+.tombol-hapus:hover { color: var(--warna-hapus); }
+
+/* Empty state (belum ada log) */
+.riwayat-kosong {
+  padding    : 40px 20px;
+  text-align : center;
+  color      : var(--warna-teks-dim);
+  font-size  : 14px;
+  line-height: 1.7;
+}
+
+
+/* ============================================================
+   17. NAVIGASI BAWAH (3 TAB)
+   ============================================================ */
+.nav-bawah {
+  position        : fixed;
+  bottom          : 0;
+  left            : 50%;
+  transform       : translateX(-50%);
+  width           : 100%;
+  max-width       : 420px;
+  padding         : 12px 24px 20px;
+  background      : linear-gradient(180deg, transparent, rgba(6,30,46,0.95));
+  backdrop-filter : blur(20px);
+  display         : flex;
+  justify-content : space-around;
+  z-index         : 100;
+}
+
+.tombol-nav {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  gap            : 4px;
+  padding        : 8px 16px;
+  border-radius  : 12px;
+  border         : none;
+  background     : none;
+  cursor         : pointer;
+  color          : var(--warna-teks-dim);
+  font-family    : 'DM Sans', sans-serif;
+  font-size      : 11px;
+  transition     : color 0.2s;
+}
+
+/* Tab yang sedang aktif */
+.tombol-nav.aktif { color: var(--warna-busa); }
+
+
+/* ============================================================
+   18. TOAST (PESAN SINGKAT)
+   Muncul di atas layar lalu hilang otomatis.
+   ============================================================ */
+.toast {
+  position        : fixed;
+  top             : 20px;
+  left            : 50%;
+  /* Awalnya tersembunyi di atas layar */
+  transform       : translateX(-50%) translateY(-80px);
+  background      : linear-gradient(135deg, rgba(26,127,160,0.92), rgba(10,77,110,0.97));
+  border          : 1px solid rgba(91,184,212,0.35);
+  border-radius   : 16px;
+  padding         : 14px 24px;
+  color           : var(--warna-putih);
+  font-size       : 14px;
+  font-weight     : 500;
+  z-index         : 999;
+  transition      : transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter : blur(20px);
+  box-shadow      : 0 8px 32px rgba(0,0,0,0.25);
+  white-space     : nowrap;
+}
+
+/* Kelas .tampil menampilkan toast */
+.toast.tampil { transform: translateX(-50%) translateY(0); }
+
+
+/* ============================================================
+   19. BANNER SELAMAT (SAAT TARGET TERCAPAI)
+   ============================================================ */
+.banner-selamat {
+  margin        : 0 16px 20px;
+  background    : linear-gradient(135deg, rgba(240,165,0,0.18), rgba(240,165,0,0.04));
+  border        : 1px solid rgba(240,165,0,0.28);
+  border-radius : 20px;
+  padding       : 18px 20px;
+  display       : flex;
+  align-items   : center;
+  gap           : 12px;
+  animation     : muncul 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes muncul {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.banner-selamat strong {
+  display   : block;
+  color     : var(--warna-aksen);
+  font-size : 14px;
+}
+.banner-selamat span { font-size: 12px; color: var(--warna-teks-dim); }
+
+
+/* ============================================================
+   20. EFEK PERCIKAN SAAT MINUM
+   Ikon tetes air yang beterbangan ke bawah.
+   ============================================================ */
+.efek-percikan {
+  position       : fixed;
+  inset          : 0;
+  pointer-events : none;
+  z-index        : 999;
+}
+
+.tetes {
+  position  : absolute;
+  animation : jatuh 1s ease-in forwards;
+}
+
+@keyframes jatuh {
+  0%   { transform: translateY(0) scale(1);   opacity: 1; }
+  100% { transform: translateY(80px) scale(0.3); opacity: 0; }
+}
+
+
+/* ============================================================
+   21. SISTEM HALAMAN (TAB)
+   Hanya 1 halaman yang tampil, sisanya disembunyikan.
+   ============================================================ */
+.halaman       { display: none; }
+.halaman.aktif { display: block; }
